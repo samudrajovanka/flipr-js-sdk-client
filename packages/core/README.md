@@ -1,4 +1,4 @@
-# @flipr/sdk-client
+# @flipr/core-js-sdk-client
 
 TypeScript/JavaScript client SDK for Flipr feature flags.
 
@@ -6,22 +6,22 @@ TypeScript/JavaScript client SDK for Flipr feature flags.
 
 ```bash
 # npm
-npm install @flipr/sdk-client
+npm install @flipr/core-js-sdk-client
 
 # pnpm
-pnpm add @flipr/sdk-client
+pnpm add @flipr/core-js-sdk-client
 
 # Yarn
-yarn add @flipr/sdk-client
+yarn add @flipr/core-js-sdk-client
 
 # Bun
-bun add @flipr/sdk-client
+bun add @flipr/core-js-sdk-client
 ```
 
 ## Quick Start
 
 ```typescript
-import { FliprClient } from "@flipr/sdk-client";
+import { FliprClient } from "@flipr/core-js-sdk-client";
 
 const client = new FliprClient({
   apiKey: "<<your-api-key>>",
