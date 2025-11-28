@@ -1,0 +1,33 @@
+{
+  "name": "@flipr/js-sdk-client",
+  "description": "Javascript client SDK for Flipr feature flags",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "prepare:install": "lefthook install",
+    "biome:format": "biome format --write",
+    "biome:lint": "biome lint --write",
+    "biome:check": "biome check --write",
+    "core:build": "bun -F=@flipr/core-js-sdk-client run build",
+    "core:dev": "bun -F=@flipr/core-js-sdk-client run dev",
+    "core:typecheck": "bun -F=@flipr/core-js-sdk-client run typecheck",
+    "example:web:dev": "bun -F=flipr-web-example run dev"
+  },
+  "keywords": [
+    "feature-flags",
+    "flipr",
+    "sdk",
+    "typescript",
+    "javascript"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@biomejs/biome": "2.3.7",
+    "lefthook": "^2.0.4",
+    "standard-version": "^9.5.0"
+  }
+}
