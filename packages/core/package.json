@@ -1,7 +1,7 @@
 {
   "name": "@flipr/core-js-sdk-client",
   "description": "Core Javascript SDK for Flipr feature flags",
-  "version": "0.1.1-alpha.0",
+  "version": "0.1.1-alpha.1",
   "type": "module",
   "files": [
     "dist"
@@ -26,11 +26,11 @@
     "build": "bunup --env inline",
     "dev": "bunup --watch --env inline",
     "typecheck": "tsc --noEmit",
-    "release:dev": "standard-version --prerelease alpha --relase-as patch",
+    "release:dev": "standard-version --prerelease alpha --relase-as patch -t core@v",
     "release:prod": "bun release:prod:patch",
-    "release:prod:patch": "standard-version --release-as patch",
-    "release:prod:minor": "standard-version --release-as minor",
-    "release:prod:major": "standard-version --release-as major"
+    "release:prod:patch": "standard-version --release-as patch -t core@v",
+    "release:prod:minor": "standard-version --release-as minor -t core@v",
+    "release:prod:major": "standard-version --release-as major -t core@v"
   },
   "keywords": [
     "feature-flags",
