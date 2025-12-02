@@ -26,7 +26,7 @@
     "build": "bunup --env inline",
     "dev": "bunup --watch --env inline",
     "typecheck": "tsc --noEmit",
-    "release:dev": "standard-version --prerelease alpha --relase-as patch -t core@v",
+    "release:dev": "standard-version --prerelease alpha --release-as patch -t core@v",
     "release:prod": "bun release:prod:patch",
     "release:prod:patch": "standard-version --release-as patch -t core@v",
     "release:prod:minor": "standard-version --release-as minor -t core@v",
