@@ -3,18 +3,16 @@ import { getFlags as endpointGetFlags } from '../../endpoints/flags';
 import { ForbiddenError } from '../../exceptions';
 import type { Flag, FlagsRecord } from '../../types/flags';
 import { Cache } from '../cache';
-import type { FliprConfig } from './types';
+import { evaluateFlag } from '../../utils/evaluation';
+import type { EvaluationContext, FliprConfig } from './types';
 
 export class FliprClient {
-	private config: Required<FliprConfig>;
 	private cache: Cache<Flag | FlagsRecord>;
 	private cacheTTL: number;
 	private pollingInterval: NodeJS.Timeout | null = null;
 
-	constructor(config: FliprConfig) {
-		this.config = { ...config };
+	constructor(private config: FliprConfig) {
 		this.cacheTTL = 1000 * 60 * 60; // 1 hour
-
 		this.cache = new Cache<Flag | FlagsRecord>();
 	}
 
@@ -56,12 +54,22 @@ export class FliprClient {
 		return this.cache.get(cacheKey) as Flag | undefined;
 	}
 
-	isEnabled(key: string) {
+	private getContext(context?: EvaluationContext) {
+		return { ...this.config.context, ...(context ?? {}) };
+	}
+
+	setContext(context: EvaluationContext) {
+		this.config.context = this.getContext(context);
+	}
+
+	isEnabled(key: string, context?: EvaluationContext) {
 		const flag = this.getFlag(key);
 
 		if (!flag) return false;
 
-		return flag.enabled;
+		const mergedContext = this.getContext(context);
+
+		return evaluateFlag(this.config.environment, flag, key, mergedContext);
 	}
 
 	startPolling(ms = 15000) {
