@@ -33,7 +33,7 @@ export const evaluateFlag = (
 		return false;
 	}
 
-	if (!flag.rules || flag.rules.length === 0) {
+	if (!flag.rules.length) {
 		return true;
 	}
 

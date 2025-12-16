@@ -54,15 +54,19 @@ export class FliprClient {
 		return this.cache.get(cacheKey) as Flag | undefined;
 	}
 
-	private getContext(context?: EvaluationContext) {
+	private getContext(context?: Partial<EvaluationContext>) {
 		return { ...this.config.context, ...(context ?? {}) };
 	}
 
-	setContext(context: EvaluationContext) {
-		this.config.context = this.getContext(context);
+	setContext(context: EvaluationContext, options?: { replace?: boolean }) {
+		this.config.context = options?.replace ? context : this.getContext(context);
 	}
 
-	isEnabled(key: string, context?: EvaluationContext) {
+	clearContext() {
+		this.config.context = {};
+	}
+
+	isEnabled(key: string, context?: Partial<EvaluationContext>) {
 		const flag = this.getFlag(key);
 
 		if (!flag) return false;
