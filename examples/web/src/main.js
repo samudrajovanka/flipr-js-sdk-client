@@ -1,7 +1,7 @@
 import { FliprClient } from '@flipr/core-js-sdk-client';
 
 const flipr = new FliprClient({
-	apiKey: 'flipr_yyth9yy2uci8qih738exxa4907yzoiz6',
+	apiKey: '<<api-key>>',
 	environment: 'production',
 });
 
