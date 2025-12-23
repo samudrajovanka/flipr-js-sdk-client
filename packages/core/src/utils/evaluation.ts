@@ -1,5 +1,10 @@
-import { EvaluationContext } from "../services/client/types";
-import type { Flag, TargetingRule, TargetingCondition, PercentageRule } from '../types/flags';
+import type { EvaluationContext } from '../services/client/types';
+import type {
+	Flag,
+	PercentageRule,
+	TargetingCondition,
+	TargetingRule,
+} from '../types/flags';
 
 /**
  * Generates a hash for a given string using FNV-1a algorithm
@@ -13,7 +18,7 @@ const generateHash = (str: string): number => {
 		hash = Math.imul(hash, 16777619);
 	}
 	return hash >>> 0;
-}
+};
 
 /**
  * Evaluates a targeting rule for a given flag
@@ -56,6 +61,10 @@ const evaluateTargetingRule = (
 			case 'IN':
 				if (Array.isArray(condition.value)) {
 					isMatch = condition.value.includes(String(attributeValue));
+				} else {
+					console.warn(
+						`[Flipr] Flag '${flagKey}' has targeting rule with 'IN' operator but non-array value for attribute '${condition.attribute}'.`,
+					);
 				}
 				break;
 		}
@@ -124,18 +133,14 @@ export const evaluateFlag = (
 		return true;
 	}
 
-	return flag.rules.every(rule => {
+	return flag.rules.every((rule) => {
 		if (rule.type === 'percentage') {
 			return evaluatePercentageRule(flagKey, environment, rule, context);
 		} else if (rule.type === 'targeting') {
 			return evaluateTargetingRule(flagKey, rule, context);
 		}
 
-		console.warn(
-			`[Flipr] Flag '${flagKey}' has unknown rule type`,
-		);
+		console.warn(`[Flipr] Flag '${flagKey}' has unknown rule type`);
 		return false;
-	})
+	});
 };
-
-

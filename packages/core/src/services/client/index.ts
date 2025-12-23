@@ -2,8 +2,8 @@ import { isAxiosError } from 'axios';
 import { getFlags as endpointGetFlags } from '../../endpoints/flags';
 import { ForbiddenError } from '../../exceptions';
 import type { Flag, FlagsRecord } from '../../types/flags';
-import { Cache } from '../cache';
 import { evaluateFlag } from '../../utils/evaluation';
+import { Cache } from '../cache';
 import type { EvaluationContext, FliprConfig } from './types';
 
 export class FliprClient {
