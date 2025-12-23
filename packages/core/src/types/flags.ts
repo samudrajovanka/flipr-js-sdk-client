@@ -44,4 +44,3 @@ export type Flag = {
 };
 
 export type FlagsRecord = Record<string, Flag>;
-

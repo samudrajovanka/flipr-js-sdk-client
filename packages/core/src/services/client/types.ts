@@ -3,6 +3,7 @@ export interface EvaluationContext {
 	 * User unique identifier
 	 */
 	identifier?: string;
+	// biome-ignore lint/suspicious/noExplicitAny: use index
 	[key: string]: any;
 }
 
