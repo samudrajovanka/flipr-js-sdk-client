@@ -10,28 +10,58 @@ async function test() {
 		await flipr.initialize();
 		// await flipr.startPolling(); // Disable polling for simple test
 
-		const users = ['user1', 'user2', 'user3', 'user4', 'user5'];
+		// Define users with different attributes for targeting rules
+		const users = [
+			{
+				identifier: 'user1',
+				email: 'test@gmail.com',
+				name: 'name',
+				country: 'indonesia',
+			},
+			{
+				identifier: 'user2',
+				email: 'test@yahoo.com',
+				name: 'name',
+				country: 'indonesia',
+			},
+			{
+				identifier: 'user3',
+				email: 'test@gmail.com',
+				name: 'name',
+				country: 'singapore',
+			},
+			{
+				identifier: 'user4',
+				email: 'other@gmail.com',
+				name: 'name',
+				country: 'indonesia',
+			},
+		];
+
 		const resultContainer = document.getElementById('result');
 		resultContainer.innerHTML = ''; // Clear previous results
 
-		// 1. Initial State
-		console.log('--- Initial State ---');
-		users.forEach((user) => {
-			// Using local context (legacy way)
-			const isEnabled = flipr.isEnabled('text-v2', { identifier: user });
+		// 1. Check Rules
+		console.log('--- Checking Targeting Rules ---');
+		users.forEach((userCtx) => {
+			const isEnabled = flipr.isEnabled('text-v2', userCtx);
 			logResult(
-				`User ${user}: Text V2 is ${isEnabled ? 'ENABLED' : 'DISABLED'} (Local Context)`,
+				`User ${userCtx.identifier} (${userCtx.email}, ${userCtx.country}): Text V2 is ${isEnabled ? 'ENABLED' : 'DISABLED'}`,
 			);
 		});
 
-		// 2. Simulate Login using Global Context
-		console.log('--- Global Context (Login) ---');
-		const loggedInUser = 'user3';
-		flipr.setContext({ identifier: loggedInUser });
+		// 2. Global Context
+		console.log('--- Global Context ---');
+		const globalUser = {
+			identifier: 'globalUser',
+			email: 'global@gmail.com',
+			country: 'id',
+		};
+		flipr.setContext(globalUser);
 
 		const isEnabledGlobal = flipr.isEnabled('text-v2');
 		logResult(
-			`Current User (${loggedInUser}): Text V2 is ${isEnabledGlobal ? 'ENABLED' : 'DISABLED'} (Global Context)`,
+			`Global User (${globalUser.email}): Text V2 is ${isEnabledGlobal ? 'ENABLED' : 'DISABLED'} (Global Context)`,
 		);
 	} catch (err) {
 		console.error(err);

@@ -3,6 +3,7 @@ export interface EvaluationContext {
 	 * User unique identifier
 	 */
 	identifier?: string;
+	[key: string]: any;
 }
 
 /**
