@@ -1,9 +1,9 @@
-import type { ListernerFlagKeyType } from '../client/types';
+import type { ListenerFlagKeyType } from '../client/types';
 
 export class FliprEventEmitter {
 	private listeners: Map<string, Set<(changedKey: string) => void>> = new Map();
 
-	on(key: ListernerFlagKeyType, callback: (changedKey: string) => void) {
+	on(key: ListenerFlagKeyType, callback: (changedKey: string) => void) {
 		if (!this.listeners.has(key)) {
 			this.listeners.set(key, new Set());
 		}
@@ -14,7 +14,7 @@ export class FliprEventEmitter {
 		};
 	}
 
-	off(key: ListernerFlagKeyType, callback: (changedKey: string) => void) {
+	off(key: ListenerFlagKeyType, callback: (changedKey: string) => void) {
 		const set = this.listeners.get(key);
 
 		if (!set) return;
@@ -25,7 +25,7 @@ export class FliprEventEmitter {
 		}
 	}
 
-	emit(key: ListernerFlagKeyType, changedKey: string) {
+	emit(key: ListenerFlagKeyType, changedKey: string) {
 		this.listeners.get(key)?.forEach((cb) => {
 			cb(changedKey);
 		});

@@ -3,11 +3,14 @@ import type { Connection } from './types';
 export class PollingConnection implements Connection {
 	private pollingInterval: NodeJS.Timeout | null = null;
 
-	constructor(private callback: () => void) {}
+	constructor(
+		private callback: () => void,
+		private intervalMs: number = 15000,
+	) {}
 
-	connect(ms = 15000) {
+	connect() {
 		if (this.pollingInterval) return;
-		this.pollingInterval = setInterval(() => this.callback(), ms);
+		this.pollingInterval = setInterval(() => this.callback(), this.intervalMs);
 	}
 
 	disconnect() {

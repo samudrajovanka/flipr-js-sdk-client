@@ -1,4 +1,4 @@
 export interface Connection {
-	connect(ms?: number): void;
+	connect(): void;
 	disconnect(): void;
 }
