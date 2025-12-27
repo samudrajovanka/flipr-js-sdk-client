@@ -1,23 +1,53 @@
 import { isAxiosError } from 'axios';
+import { ListernerFlagKey } from '../../constants/listener';
 import { getFlags as endpointGetFlags } from '../../endpoints/flags';
 import { ForbiddenError } from '../../exceptions';
+import type { FlagUpdateEvent } from '../../types/events';
 import type { Flag, FlagsRecord } from '../../types/flags';
 import { evaluateFlag } from '../../utils/evaluation';
 import { Cache } from '../cache';
-import type { EvaluationContext, FliprConfig } from './types';
+import { PollingConnection } from '../connection/polling';
+import { StreamConnection } from '../connection/stream';
+import { FliprEventEmitter } from '../event/emitter';
+import type { EvaluationContext, FliprConfig, InitializeConfig } from './types';
 
 export class FliprClient {
 	private cache: Cache<Flag | FlagsRecord>;
 	private cacheTTL: number;
-	private pollingInterval: NodeJS.Timeout | null = null;
+	private pollingConnection: PollingConnection;
+	private streamConnection: StreamConnection;
+	private emitter: FliprEventEmitter;
 
 	constructor(private config: FliprConfig) {
 		this.cacheTTL = 1000 * 60 * 60; // 1 hour
 		this.cache = new Cache<Flag | FlagsRecord>();
+		this.emitter = new FliprEventEmitter();
+		this.pollingConnection = new PollingConnection(() => {
+			this.getFlags();
+		});
+		this.streamConnection = new StreamConnection(
+			this.config,
+			(data) => this.handleStreamUpdate(data),
+			(error) => {
+				console.error(
+					'SSE connection error, falling back to polling...',
+					error,
+				);
+				this.streamConnection.disconnect();
+				this.pollingConnection.connect();
+			},
+		);
 	}
 
-	async initialize() {
+	async initialize(config?: InitializeConfig) {
 		await this.getFlags();
+
+		if (config?.autoConnectStream) this.streamConnection.connect();
+		else this.pollingConnection.connect();
+	}
+
+	private getCacheKey(key: string) {
+		return `flags:${this.config.environment}:${key}`;
 	}
 
 	private async getFlags(): Promise<FlagsRecord> {
@@ -28,14 +58,31 @@ export class FliprClient {
 
 			const flags = response.data.data.flags || [];
 
-			this.cache.clear();
+			const currentKeys = new Set(this.cache.keys());
 
 			Object.entries(flags).forEach(([key, flag]) => {
-				this.cache.set(
-					`flags:${this.config.environment}:${key}`,
-					flag,
-					this.cacheTTL,
-				);
+				const cacheKey = this.getCacheKey(key);
+				const currentFlag = this.cache.get(cacheKey);
+
+				if (
+					!currentFlag ||
+					JSON.stringify(currentFlag) !== JSON.stringify(flag)
+				) {
+					this.cache.set(cacheKey, flag, this.cacheTTL);
+					this.emitter.emit(ListernerFlagKey.change, key);
+					this.emitter.emit(key, key);
+				}
+
+				currentKeys.delete(cacheKey);
+			});
+
+			currentKeys.forEach((cacheKey) => {
+				const parts = cacheKey.split(':');
+				const flagKey = parts[parts.length - 1];
+
+				this.cache.delete(cacheKey);
+				this.emitter.emit(ListernerFlagKey.change, flagKey);
+				this.emitter.emit(flagKey, flagKey);
 			});
 
 			return flags;
@@ -48,8 +95,21 @@ export class FliprClient {
 		}
 	}
 
+	private handleStreamUpdate(data: FlagUpdateEvent) {
+		const cacheKey = this.getCacheKey(data.flagKey);
+
+		if (data.type === 'DELETED') {
+			this.cache.delete(cacheKey);
+		} else if (data.data) {
+			this.cache.set(cacheKey, data.data, this.cacheTTL);
+		}
+
+		this.emitter.emit(ListernerFlagKey.change, data.flagKey);
+		this.emitter.emit(data.flagKey, data.flagKey);
+	}
+
 	private getFlag(key: string) {
-		const cacheKey = `flags:${this.config.environment}:${key}`;
+		const cacheKey = this.getCacheKey(key);
 
 		return this.cache.get(cacheKey) as Flag | undefined;
 	}
@@ -76,14 +136,15 @@ export class FliprClient {
 		return evaluateFlag(this.config.environment, flag, key, mergedContext);
 	}
 
-	startPolling(ms = 15000) {
-		if (this.pollingInterval) return;
-		this.pollingInterval = setInterval(() => this.getFlags(), ms);
+	onChange(handler: (changedKey: string) => void) {
+		return this.emitter.on(ListernerFlagKey.change, handler);
 	}
 
-	stopPolling() {
-		if (!this.pollingInterval) return;
-		clearInterval(this.pollingInterval);
-		this.pollingInterval = null;
+	onFlag(key: string, handler: () => void) {
+		const callback = (changedKey: string) => {
+			if (changedKey === key) handler();
+		};
+
+		return this.emitter.on(key, callback);
 	}
 }

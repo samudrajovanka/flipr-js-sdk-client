@@ -1,3 +1,5 @@
+import type { ListernerFlagKey } from '../../constants/listener';
+
 export interface EvaluationContext {
 	/**
 	 * User unique identifier
@@ -25,3 +27,18 @@ export interface FliprConfig {
 	 */
 	context?: EvaluationContext;
 }
+
+export interface InitializeConfig {
+	/**
+	 * Whether to automatically connect to the stream
+	 */
+	autoConnectStream?: boolean;
+	/**
+	 * Whether to automatically start polling
+	 */
+	autoStartPolling?: boolean;
+}
+
+export type ListernerFlagKeyType =
+	| keyof typeof ListernerFlagKey
+	| (string & {});
