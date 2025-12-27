@@ -1,3 +1,3 @@
-export const ListernerFlagKey = {
+export const ListenerFlagKey = {
 	change: 'change',
 };

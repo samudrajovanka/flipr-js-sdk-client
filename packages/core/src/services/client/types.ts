@@ -1,4 +1,4 @@
-import type { ListernerFlagKey } from '../../constants/listener';
+import type { ListenerFlagKey } from '../../constants/listener';
 
 export interface EvaluationContext {
 	/**
@@ -39,6 +39,6 @@ export interface InitializeConfig {
 	autoStartPolling?: boolean;
 }
 
-export type ListernerFlagKeyType =
-	| keyof typeof ListernerFlagKey
+export type ListenerFlagKeyType =
+	| keyof typeof ListenerFlagKey
 	| (string & {});

@@ -1,5 +1,5 @@
 import { isAxiosError } from 'axios';
-import { ListernerFlagKey } from '../../constants/listener';
+import { ListenerFlagKey } from '../../constants/listener';
 import { getFlags as endpointGetFlags } from '../../endpoints/flags';
 import { ForbiddenError } from '../../exceptions';
 import type { FlagUpdateEvent } from '../../types/events';
@@ -14,8 +14,8 @@ import type { EvaluationContext, FliprConfig, InitializeConfig } from './types';
 export class FliprClient {
 	private cache: Cache<Flag | FlagsRecord>;
 	private cacheTTL: number;
-	private pollingConnection: PollingConnection;
-	private streamConnection: StreamConnection;
+	pollingConnection: PollingConnection;
+	streamConnection: StreamConnection;
 	private emitter: FliprEventEmitter;
 
 	constructor(private config: FliprConfig) {
@@ -69,7 +69,7 @@ export class FliprClient {
 					JSON.stringify(currentFlag) !== JSON.stringify(flag)
 				) {
 					this.cache.set(cacheKey, flag, this.cacheTTL);
-					this.emitter.emit(ListernerFlagKey.change, key);
+					this.emitter.emit(ListenerFlagKey.change, key);
 					this.emitter.emit(key, key);
 				}
 
@@ -81,7 +81,7 @@ export class FliprClient {
 				const flagKey = parts[parts.length - 1];
 
 				this.cache.delete(cacheKey);
-				this.emitter.emit(ListernerFlagKey.change, flagKey);
+				this.emitter.emit(ListenerFlagKey.change, flagKey);
 				this.emitter.emit(flagKey, flagKey);
 			});
 
@@ -104,7 +104,7 @@ export class FliprClient {
 			this.cache.set(cacheKey, data.data, this.cacheTTL);
 		}
 
-		this.emitter.emit(ListernerFlagKey.change, data.flagKey);
+		this.emitter.emit(ListenerFlagKey.change, data.flagKey);
 		this.emitter.emit(data.flagKey, data.flagKey);
 	}
 
@@ -137,7 +137,7 @@ export class FliprClient {
 	}
 
 	onChange(handler: (changedKey: string) => void) {
-		return this.emitter.on(ListernerFlagKey.change, handler);
+		return this.emitter.on(ListenerFlagKey.change, handler);
 	}
 
 	onFlag(key: string, handler: () => void) {
