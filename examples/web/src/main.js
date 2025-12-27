@@ -7,8 +7,7 @@ const flipr = new FliprClient({
 
 async function test() {
 	try {
-		await flipr.initialize();
-		// await flipr.startPolling(); // Disable polling for simple test
+		await flipr.initialize({ autoConnectStream: true });
 
 		// Define users with different attributes for targeting rules
 		const users = [
@@ -55,7 +54,8 @@ async function test() {
 		const globalUser = {
 			identifier: 'globalUser',
 			email: 'global@gmail.com',
-			country: 'id',
+			name: 'name',
+			country: 'indonesia',
 		};
 		flipr.setContext(globalUser);
 
@@ -63,6 +63,26 @@ async function test() {
 		logResult(
 			`Global User (${globalUser.email}): Text V2 is ${isEnabledGlobal ? 'ENABLED' : 'DISABLED'} (Global Context)`,
 		);
+
+		// 3. Realtime Updates
+		console.log('--- Realtime Updates (SSE) ---');
+		logResult('Listening for real-time updates...');
+
+		flipr.onFlag('text-v2', () => {
+			const currentValue = flipr.isEnabled('text-v2');
+			logResult(
+				`[UPDATE] Text V2 changed to ${currentValue ? 'ENABLED' : 'DISABLED'} (Global Context)`,
+			);
+		});
+
+		flipr.onChange((changedKey) => {
+			if (changedKey === 'text-v3') {
+				const currentValue = flipr.isEnabled('text-v3');
+				logResult(
+					`[UPDATE] Text V3 changed to ${currentValue ? 'ENABLED' : 'DISABLED'} (Global Context)`,
+				);
+			}
+		});
 	} catch (err) {
 		console.error(err);
 	}

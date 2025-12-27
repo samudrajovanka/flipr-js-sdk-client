@@ -60,4 +60,11 @@ export class Cache<T> {
 	delete(key: string): void {
 		this.store.delete(key);
 	}
+
+	/**
+	 * Get all keys in cache
+	 */
+	keys(): IterableIterator<string> {
+		return this.store.keys();
+	}
 }
