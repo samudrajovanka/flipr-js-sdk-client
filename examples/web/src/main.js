@@ -45,7 +45,7 @@ async function test() {
 		users.forEach((userCtx) => {
 			const isEnabled = flipr.isEnabled('text-v2', userCtx);
 			logResult(
-				`User ${userCtx.identifier} (${userCtx.email}, ${userCtx.country}): Text V2 is ${isEnabled ? 'ENABLED' : 'DISABLED'}`,
+				`User ${userCtx.identifier} (${userCtx.name} ${userCtx.email}, ${userCtx.country}): Text V2 is ${isEnabled ? 'ENABLED' : 'DISABLED'}`,
 			);
 		});
 
@@ -61,7 +61,7 @@ async function test() {
 
 		const isEnabledGlobal = flipr.isEnabled('text-v2');
 		logResult(
-			`Global User (${globalUser.email}): Text V2 is ${isEnabledGlobal ? 'ENABLED' : 'DISABLED'} (Global Context)`,
+			`Global User (${globalUser.name} ${globalUser.email}, ${globalUser.country}): Text V2 is ${isEnabledGlobal ? 'ENABLED' : 'DISABLED'} (Global Context)`,
 		);
 
 		// 3. Realtime Updates

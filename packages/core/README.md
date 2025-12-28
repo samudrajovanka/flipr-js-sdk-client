@@ -28,11 +28,14 @@ const client = new FliprClient({
   environment: "<<env-stage>>",
 });
 
-// Initialize the client (fetches all flags)
-await client.initialize();
+// Initialize the client and connect to the stream
+await client.initialize({ autoConnectStream: true });
 
-// Start auto-polling for flag updates (every 15 seconds by default)
-client.startPolling();
+// Set global context
+client.setContext({
+  userId: "123",
+  userRole: "admin",
+});
 
 // Check if a flag is enabled
 const isNewFeatureEnabled = client.isEnabled("new-feature");
@@ -40,8 +43,15 @@ if (isNewFeatureEnabled) {
   console.log("New feature is enabled!");
 }
 
-// Stop polling when done
-client.stopPolling();
+// Watch for changes in the flag
+client.onChange((changedKey) => {
+  console.log("Flag changed:", changedKey);
+});
+
+// Watch for changes specific flag
+client.onFlag("new-feature", () => {
+  console.log("New feature flag changed!");
+});
 ```
 
 ## Configuration
@@ -53,12 +63,15 @@ interface FliprConfig {
 
   // Required: Environment name (e.g., 'development', 'staging', 'production')
   environment: string;
+
+  // Optional: Global context
+  context?: EvaluationContext;
 }
 ```
 
 ## API Methods
 
-### `initialize(): Promise<void>`
+### `initialize(config?: InitializeConfig): Promise<void>`
 
 Initialize the SDK by fetching all feature flags for the configured environment. This populates the internal cache and should be called before using other methods.
 
@@ -66,7 +79,7 @@ Initialize the SDK by fetching all feature flags for the configured environment.
 await client.initialize();
 ```
 
-### `isEnabled(key: string): boolean`
+### `isEnabled(key: string, context?: EvaluationContext): boolean`
 
 Check if a feature flag is enabled. Returns `false` if the flag doesn't exist.
 
@@ -78,27 +91,35 @@ if (client.isEnabled("new-feature")) {
 }
 ```
 
-### `startPolling(ms?: number): void`
+### `setContext(context: EvaluationContext): void`
 
-Start automatic polling to refresh flags at regular intervals. Defaults to 15 seconds (15000ms) if no interval is specified.
+Set global context for the SDK. This is used to evaluate feature flags based on user attributes.
 
 ```typescript
-// Poll every 15 seconds (default)
-client.startPolling();
-
-// Poll every 30 seconds
-client.startPolling(30000);
-
-// Poll every 5 seconds
-client.startPolling(5000);
+client.setContext({
+  userId: "123",
+  userRole: "admin",
+});
 ```
 
-### `stopPolling(): void`
+### `onChange(callback: (changedKey: string) => void): void`
 
-Stop automatic polling.
+Register a callback to be called when any feature flag changes.
 
 ```typescript
-client.stopPolling();
+client.onChange((changedKey) => {
+  console.log("Flag changed:", changedKey);
+});
+```
+
+### `onFlag(key: string, callback: () => void): void`
+
+Register a callback to be called when a specific feature flag changes.
+
+```typescript
+client.onFlag("new-feature", () => {
+  console.log("New feature flag changed!");
+});
 ```
 
 ## Caching
@@ -136,9 +157,8 @@ bun run dev
 
 ## Best Practices
 
-1. **Initialize once:** Call `initialize()` once when your application starts
-2. **Use polling for real-time updates:** Enable polling to keep flags synchronized with the server
-3. **Clean up:** Call `stopPolling()` when your application shuts down or component unmounts
+1. Initialize the SDK once when your application starts
+2. Set global context for the SDK. This is used to evaluate feature flags based on user attributes.
 
 ## License
 
